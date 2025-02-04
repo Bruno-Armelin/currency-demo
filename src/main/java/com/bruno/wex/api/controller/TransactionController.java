@@ -1,6 +1,7 @@
 package com.bruno.wex.api.controller;
 
 import com.bruno.wex.models.NewTransactionDTO;
+import com.bruno.wex.models.errors.CurrencyErrorDTO;
 import com.bruno.wex.models.validators.NewTransactionValidator;
 import com.bruno.wex.models.validators.TransactionWithCurrencyValidator;
 import com.bruno.wex.service.TransactionService;
@@ -34,9 +35,6 @@ public class TransactionController {
         return ResponseEntity.internalServerError().build();
     }
 
-    private final String TRANSACTION_ERROR_FORMAT = "{\"message\":\"%s\"}";
-    private final String TRANSACTION_NOT_FOUND = String.format(TRANSACTION_ERROR_FORMAT, "Transaction ID not found");
-    private final String CURRENCY_NOT_FOUND = String.format(TRANSACTION_ERROR_FORMAT, "Currency exchange rate was not found");
 
     @GetMapping(value = "/{uuid}/{currency}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getTransaction(@PathVariable("uuid") String uuid, @PathVariable("currency") String currency) {
@@ -46,12 +44,12 @@ public class TransactionController {
 
         var entity = transactionService.getTransactionFromID(uuid);
         if(entity == null) {
-            return new ResponseEntity<>(TRANSACTION_NOT_FOUND, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new CurrencyErrorDTO("Transaction ID not found"), HttpStatus.NOT_FOUND);
         }
 
         var currencyRate = treasuryReportingRatesService.findCurrencyRate(currency, entity.getTransactionDate().toLocalDate());
         if(currencyRate == null) {
-            return new ResponseEntity<>(CURRENCY_NOT_FOUND, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CurrencyErrorDTO("Currency exchange rate was not found"), HttpStatus.BAD_REQUEST);
         }
 
         var responseDto = transactionService.convertTransactionToCurrency(entity, currencyRate, currency);

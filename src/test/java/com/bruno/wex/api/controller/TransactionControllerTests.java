@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -41,7 +42,7 @@ public class TransactionControllerTests {
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(result.getBody()).isNotNull();
-        Assertions.assertThat(result.getBody().getUniqueId().length()).isGreaterThan(20);
+        Assertions.assertThat(UUID.fromString(result.getBody().getUniqueId())).isNotNull();
         Assertions.assertThat(result.getBody().getPurchaseAmount().compareTo(BigDecimal.valueOf(10.12))).isEqualTo(0);
     }
 
@@ -63,7 +64,7 @@ public class TransactionControllerTests {
         var result = restTemplate.getForEntity("http://localhost:" + port + "/transactions/"+transactionResult.getBody().getUniqueId()+"/Brazilian-Real", String.class);
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        Assertions.assertThat(result.getBody()).contains("Currency");
+        Assertions.assertThat(result.getBody()).contains("Currency exchange rate was not found");
     }
 
     @Test

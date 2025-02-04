@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 
@@ -36,7 +37,7 @@ public class TransactionServiceTests {
         var result = transactionService.addNewTransaction(dto);
 
         Assertions.assertThat(result).isNotNull();
-        Assertions.assertThat(result.getUniqueId().length()).isGreaterThan(20);
+        Assertions.assertThat(UUID.fromString(result.getUniqueId())).isNotNull();
         Assertions.assertThat(result.getPurchaseAmount().compareTo(BigDecimal.valueOf(50.01D))).isEqualTo(0);
     }
 
